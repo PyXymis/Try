@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %} Article {% endblock %}
+
+
+{% block header %}
+    {% if article.owner == current_user %}
+    <script>
+        function delArticle(){
+          $('#MyDialog').modal('show')
+        }
+    </script>
+        <header>
+        <!-- JS Magic -->
+        <form>
+        <div class='my_login nav navbar-dark bg-dark' style="display: block; position: fixed; top: 0;width: 100%; z-index: 100;">
+            <a class='my_close navbar-brand btn btn-second ml-2'>▽</a>
+            {% if current_user.is_authenticated %}
+            <div class="mr-5" style="float:right;">
+            <ul class="nav">
+                <li class="nav-item">
+                <a class="nav-link text-light" href="/article/change/{{ article.id }}">Change post</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link text-light" onclick="delArticle()">Delete post</a>
+                </li>
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ current_user.login }}</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Settings</a>
+                    <a class="dropdown-item" href="#">Avatars</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" onclick="logout()">Logout</a>
+                </div>
+                </li>
+            </ul>
+            </div>
+            {% endif %}
+        </div>
+        </form>
+    
+    
+        <div class="my_blank navbar-light bg-light" style="display: block;">
+            <a class='my_open navbar-brand btn btn-light ml-2'>▷</a>
+        </div>
+        <!-- Bootstrap -->
+        </header>
+        <div class="modal fade" id="MyDialog" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Подождите</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить статью?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    <a type="button" class="btn btn-primary" href="/article/delete/{{ article.id }}">Удалить</a>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+
+    {% endif %}
+{% endblock %}
+
+
+{% block body %}
+<script>
+    function addComment() {
+        $.ajax({
+            type:'POST', 
+            url: '/article/{{ article.id }}',
+            data:$('form').serialize(),
+            success: function (response) {
+                console.log('Some text')
+                var json = jQuery.parseJSON(response)
+                $('.comments').append(
+                        `<div class="comment border rounded my-3 p-1">
+                            <p class="text-secondary">${json.owner}</p>
+                            <p>${json.text}</p>
+                            <p><small>${json.date}</small></p>
+                        </div>`
+                )
+            },
+            error: function (error) {
+                console.log(`Error is ${error.responseText}`)
+            },
+        })
+    }
+</script>
+
+
+<div class="container mt-5">
+    <!-- Header -->
+    <div class="header">
+        <div class="border-secondary border-bottom" style="display: block; width: 100%;">
+            <h3>{{ article.title }}</h3>
+        </div>
+            <p style="float: left;">{{ article.owner.login }}</p>
+            <p style="float: right;"><small>{{ article.date }}</small></p>
+    </div>
+    <br>   
+    <!-- Article -->
+    <div class="body mt-3 pb-3 border-secondary border-bottom">
+        {{ article.text }}
+        <br>
+        <br>
+        {% if article.tags|length != 0 %}
+          {% for tag in article.tags %}
+            <span class="badge badge-pill badge-dark">{{ tag.name }}</span>
+          {% endfor %}
+      {% endif %}
+    </div>
+    <!-- Comments -->
+    <div class="comment_block my-3">
+        <h4>Comments:</h1>
+        <form method='POST' name='form'>
+            <div class="input-group">
+                <!-- Сделать textarea, когда разберусь как ее расшиярть -->
+                <textarea type="text" rows='2' class="form-control text_area"  autocomplete="off"
+                    placeholder="Your comment" aria-label="Recipient's username" 
+                    aria-describedby="basic-addon2" id='text' name="text"
+                    style=" white-space: nowrap; overflow: hidden;  "></textarea>
+                <div class="input-group-append">
+                  <a class="btn btn-outline-secondary" type="button" onclick="addComment()">Send</a>
+                </div>
+              </div>
+        </form>
+        <div class="comments">
+            {% for comment in article.comments|reverse  %}
+            <div class="comment border rounded my-3 p-1">
+                <p class="text-secondary">{{ comment.owner.login }}</p>
+                <p> {{ comment.text }} </p>
+                <p class="text-right"><small>{{ comment.date }}</small></p>
+            </div>
+            {% endfor %}
+        </div>  
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/actions.js') }}"></script>    
+{% endblock %}

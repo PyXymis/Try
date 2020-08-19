@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        $(document).on('input', '#textarea', function(e) {
+            console.log("blabb")
+            this.style.height = '1px';
+            this.style.height = (this.scrollHeight + 6) + 'px'; 
+        });
+    </script>
+
+    <textarea id="textarea"
+    style="	display: block;
+	width: 500px;
+	box-sizing: border-box;
+	margin: 0 0 5px 0;
+	padding: 10px;
+	border: solid 3px #e06969;
+	background-color: #fff;
+	min-height: 54px;
+	font-size: 14px; 
+	line-height: 1.2;"></textarea>
+</body>
+</html>
