@@ -1,4 +1,5 @@
 from sweater.models import User, Article, Tag, Comment
 from sweater import app, db
 
-app.run()
+if __name__=="__main__":
+	app.run()
